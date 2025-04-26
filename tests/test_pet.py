@@ -1,4 +1,5 @@
 import allure
+import pytest
 import requests
 import jsonschema
 from .schemas.pet_schema import PET_SCHEMA
@@ -171,3 +172,35 @@ class TestPet:
 
         with allure.step("Проверка статуса ответа"):
             assert response_get_nonexistent_pet.status_code == 404, "Код ответа не совпал с ожидаемым"
+
+    @allure.title("Получение списка питомцев по статусам разрешённого списка")
+    @pytest.mark.parametrize(
+        "status, expected_status_code",
+        [
+            ("available", 200),
+            ("pending", 200),
+            ("sold", 200),
+        ]
+    )
+    def test_get_pet_by_status_allowed(self, status, expected_status_code):
+        with allure.step(f"Отправка запроса на получение информации питомцев по статусу {status}"):
+            test_get_pet_by_status_allowed = requests.get(f"{BASE_URL}/pet/findByStatus", params={"status": status})
+
+        with allure.step("Проверка статуса ответа и формат данных"):
+            assert test_get_pet_by_status_allowed.status_code == expected_status_code, "Код ответа не совпал с ожидаемым"
+            assert isinstance(test_get_pet_by_status_allowed.json(), list)
+
+    @allure.title("Получение списка питомцев по статусам запрещённого списка")
+    @pytest.mark.parametrize(
+        "status, expected_status_code",
+        [
+            ("nonexistent", 400),
+            ("", 400),
+        ]
+    )
+    def test_get_pet_by_status_forbidden(self, status, expected_status_code):
+        with allure.step(f"Отправка запроса на получение информации питомцев по статусу {status}"):
+            test_get_pet_by_status_forbidden = requests.get(f"{BASE_URL}/pet/findByStatus", params={"status": status})
+
+        with allure.step("Проверка статуса ответа"):
+            assert test_get_pet_by_status_forbidden.status_code == expected_status_code, "Код ответа не совпал с ожидаемым"
