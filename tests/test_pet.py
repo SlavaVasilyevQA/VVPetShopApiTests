@@ -173,7 +173,7 @@ class TestPet:
         with allure.step("Проверка статуса ответа"):
             assert response_get_nonexistent_pet.status_code == 404, "Код ответа не совпал с ожидаемым"
 
-    @allure.title("Получение списка питомцев по статусу")
+    @allure.title("Получение списка питомцев по статусам разрешённого списка")
     @pytest.mark.parametrize(
         "status, expected_status_code",
         [
@@ -190,6 +190,7 @@ class TestPet:
             assert test_get_pet_by_status_allowed.status_code == expected_status_code, "Код ответа не совпал с ожидаемым"
             assert isinstance(test_get_pet_by_status_allowed.json(), list)
 
+    @allure.title("Получение списка питомцев по статусам запрещённого списка")
     @pytest.mark.parametrize(
         "status, expected_status_code",
         [
