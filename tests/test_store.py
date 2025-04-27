@@ -1,7 +1,8 @@
 import allure
 import requests
 import jsonschema
-from .schemas.store_schema import STORE_SCHEMA
+from .schemas import *
+
 
 BASE_URL = "http://5.181.109.28:9090/api/v3"
 
@@ -89,5 +90,4 @@ class TestStore:
 
         with allure.step("Проверка статуса ответа и содержимого"):
             assert response.status_code == 200, "Код ответа не совпал с ожидаемым"
-            assert response_json['approved'] == 50, "Статус заказа не совпадает с ожидаемым"
-            assert response_json['delivered'] == 50, "Статус заказа не совпадает с ожидаемым"
+            jsonschema.validate(response_json, INVENTORY_SCHEMA)

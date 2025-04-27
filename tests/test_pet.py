@@ -2,7 +2,7 @@ import allure
 import pytest
 import requests
 import jsonschema
-from .schemas.pet_schema import PET_SCHEMA
+from .schemas import *
 
 BASE_URL = "http://5.181.109.28:9090/api/v3"
 
