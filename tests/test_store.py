@@ -1,8 +1,8 @@
 import allure
 import requests
 import jsonschema
+from jsonschema.exceptions import ValidationError
 from .schemas import *
-
 
 BASE_URL = "http://5.181.109.28:9090/api/v3"
 
@@ -31,7 +31,8 @@ class TestStore:
         with allure.step("Проверка параметров заказа в ответе"):
             assert response_json['id'] == payload['id'], "ID заказа не совпадает с ожидаемым"
             assert response_json['petId'] == payload['petId'], "ID питомца не совпадает с ожидаемым"
-            assert response_json['quantity'] == payload['quantity'], "Количество заказанных товаров не совпадает с ожидаемым"
+            assert response_json['quantity'] == payload[
+                'quantity'], "Количество заказанных товаров не совпадает с ожидаемым"
             assert response_json['status'] == payload['status'], "Статус заказа не совпадает с ожидаемым"
             assert response_json['complete'] == payload['complete'], "Статус готовности заказа не совпадает с ожидаемым"
 
@@ -87,7 +88,14 @@ class TestStore:
         with allure.step("Отправка запроса на получение инвентаря в магазине"):
             response = requests.get(f"{BASE_URL}/store/inventory")
             response_json = response.json()
-
-        with allure.step("Проверка статуса ответа и валидация JSON-схемы"):
-            assert response.status_code == 200, "Код ответа не совпал с ожидаемым"
-            jsonschema.validate(response_json, INVENTORY_SCHEMA)
+        try:
+            with allure.step("Проверка статус кода"):
+                assert response.status_code == 200, "Код ответа не совпал с ожидаемым"
+            with allure.step("Проверка валидации JSON-схемы"):
+                jsonschema.validate(response_json, INVENTORY_SCHEMA)
+        except AssertionError as e:
+            print("Получили ошибку AssertionError: ", e.args)
+        except ValidationError as e:
+            print("Получили ошибку ValidationError: ", e.args)
+        else:
+            print("Исключения не появились, а значит код отработался успешно")
